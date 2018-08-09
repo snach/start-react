@@ -9,37 +9,62 @@ var my_news = [
         text: 'Считаю, что $ должен стоить 35 рублей!'
     },
     {
-        author: 'Гость',
+        // author: 'Гость',
         text: 'Бесплатно. Скачать. Лучший сайт - http://localhost:3000'
     }
 ];
 
+// var my_news= [];
+
+var Article = React.createClass({
+    propTypes: {
+        data: React.PropTypes.shape({
+            author: React.PropTypes.string.isRequired,
+            text: React.PropTypes.string.isRequired,
+        })
+    },
+    render: function() {
+        var author = this.props.data.author,
+            text = this.props.data.text;
+
+        return (
+            <div className="article">
+                <p className="news__author">Автор: {author}:</p>
+                <p className="news__text">Новость: {text}:</p>
+            </div>
+        )
+
+    }
+})
+
 
 var News = React.createClass({
+
+    propTypes: {
+        data: React.PropTypes.array.isRequired
+    },
+
     render: function() {
-        var last_news = this.props.last_news;
-        var newsTemplate = last_news.map(function (item, index) {
-            return (
-                <div key={index}>
-                    <p className="news__author">{item.author}:</p>
-                    <p className="news__text">{item.text}</p>
-                </div>
-            )
-        })
+
+        var data = this.props.data;
+        var newsTemplate;
+
+        if (data.length > 0) {
+            newsTemplate = data.map(function (item, index) {
+                return (
+                    <div key={index}>
+                        <Article data={item}/>
+                    </div>
+                )
+            })
+        } else {
+            newsTemplate = <p>К сожалению новостей нет</p>
+        }
         console.log(newsTemplate)
         return (
             <div className="news">
                 {newsTemplate}
-            </div>
-        );
-    }
-});
-
-var Comments = React.createClass({
-    render: function() {
-        return (
-            <div className="comments">
-                Нет новостей - комментировать нечего
+                <strong className={'news__count' + (data.length > 0 ? '' : ' none')}>Всего новостей: {data.length}</strong>
             </div>
         );
     }
@@ -50,13 +75,13 @@ var App = React.createClass({
     render: function() {
         return (
             <div className="app">
-                Всем привет, я компонент App!
-                <News last_news={my_news}/>
-                <Comments />
+                <h3>Новости</h3>
+                <News data={my_news}/>
             </div>
     );
     }
 });
+
 ReactDOM.render(
     <App />,
     document.getElementById('root')
