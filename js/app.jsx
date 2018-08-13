@@ -18,6 +18,8 @@ var my_news = [
     }
 ];
 
+window.ee = new EventEmitter();
+
 // var my_news= [];
 
 var Add = React.createClass({
@@ -44,9 +46,18 @@ var Add = React.createClass({
     onButtonClickHandler: function(e){
         e.preventDefault();
         var author = ReactDOM.findDOMNode(this.refs.author).value;
+        var textEl = ReactDOM.findDOMNode(this.refs.text);
         var text = ReactDOM.findDOMNode(this.refs.text).value;
-        alert('Автор: ' + author + '\nНовость: ' + text);
+        var item = [{
+            author: author,
+            text: text,
+            bigText: '...'
+        }];
+        window.ee.emit('News.add', item);
+        textEl.value = '';
+        this.setState({textIsEmpty: true})
     },
+
     onCheckRuleClick: function(e) {
         this.setState({agreeNotChecked: !this.state.agreeNotChecked})
     },
@@ -84,7 +95,7 @@ var Add = React.createClass({
                     onClick={this.onButtonClickHandler}
                     ref={'alert_button'}
                     disabled={agreeNotChecked || authorIsEmpty || textIsEmpty}>
-                Показать alert
+                Добавить новость
                 </button>
             </form>
         );
@@ -182,14 +193,31 @@ var News = React.createClass({
 
 
 var App = React.createClass({
+
+    getInitialState: function() {
+      return {
+          news: my_news
+      };
+    },
+    componentDidMount: function() {
+        var self = this;
+        window.ee.addListener('News.add', function (item) {
+            var nextNews = item.concat(self.state.news);
+            self.setState({news: nextNews});
+        });
+    },
+    componentWillUnmount: function() {
+        window.ee.removeListener('News.add');
+    },
     render: function() {
+        console.log('render');
         return (
             <div className="app">
                 <Add/>
                 <h3>Новости</h3>
-                <News data={my_news}/>
+                <News data={this.state.news}/>
             </div>
-    );
+        );
     }
 });
 
